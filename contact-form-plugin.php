@@ -281,7 +281,15 @@ class ContactFormPlugin {
         $content .= '<br /><br />';
         // Subject
         $content .= '<label for="your_subject">' . get_option('contact_form_subject_field') . '</label><br>';
-        $content .= '<input type="text" class="form-control" name="your_subject" id="your_subject" size="40" placeholder="Please type your subject" maxlength="20" /><br/>';
+
+        $content .= '<select name="your_subject" id="your_subject" class="form-control" placeholder="Please choose your subject">
+            <option value="Enquiry">Enquiry</option>
+            <option value="Billing">Billing</option>
+            <option value="Accounting">Acconting</option>
+            <option value="Technical Support">Technical Support</option>
+            <option value="Feedback">Feedback</option>
+            <option value="Other">Other</option>
+        </select>';
         $content .= '<span class="error" aria-live="polite"></span>';
         $content .= '<br /><br />';
         //Message
@@ -335,10 +343,17 @@ class ContactFormPlugin {
             $theSubject = sanitize_text_field($_POST['your_subject']);
             $theMessage = sanitize_textarea_field($_POST['your_message']);
             $headers = 'From: '.$theName.' <'.$theEmail.'>' . "\r\n" . 'Reply-To: ' . $theEmail;
-            wp_mail($to, $subject, $theMessage, $headers);
+
+            $body .= 'Name: '.$theName.' <br /> ';
+                $body .= 'Email: '.$theEmail.' <br /> ';
+                $body .= 'Phone: '.$thePhone. ' <br /> ';
+                $body .= 'Subject: '.$theSubject. ' <br /> ';
+                $body .= 'Message: '.$theMessage.' <br /> ';
+
+            wp_mail($to, $subject, $body, $headers);
 
             }
-            // remove_filter('wp_mail_content_type','textHTMLContent');
+            remove_filter('wp_mail_content_type','textHTMLContent');
 
             /* Form submission to comments in the admin dashbaord */
             $data = null;
@@ -393,11 +408,11 @@ class ContactFormPlugin {
                 $result = $wpdb->query($sql);
 
                 //Add sucess message below the form with div continaer
-                // if ($result === FALSE) {
-                //     echo '<div class="failed"></div>';
-                // } else {
-                //     echo '<div class="success">></div>';
-                // }
+                if ($result === FALSE) {
+                    echo '<div class="failed"></div>';
+                } else {
+                    echo '<div class="success">></div>';
+                }
 
             }
      
@@ -485,6 +500,7 @@ class ContactFormPlugin {
           theName text NOT NULL DEFAULT '',
           theEmail text NOT NULL DEFAULT '',
           thePhone text NOT NULL DEFAULT '',
+          theSubject text NOT NULL DEFAULT '', 
           theMessage longtext NOT NULL DEFAULT '',
           PRIMARY KEY  (id)
         ) $this->charset;");
