@@ -131,6 +131,12 @@ class ContactFormPlugin {
         register_setting('contactform-group','contact_form_email_field',array('santize_callback'=> 
         'santizie_text_field', 'default' => 'Please type your email below'));
 
+        //Label for subject field
+        add_settings_field('contact_form_subject_field', 'Label for subject field', array($this, 'formSubjectLabel'), 'contact-form-settings-page', 'contact_form_settings');
+        register_setting('contactform-group','contact_form_subject_field',array('santize_callback'=> 
+        'santizie_text_field', 'default' => 'Please type your subject below'));
+
+
         //Label for message field
         add_settings_field('contact_form_message_field', 'Label for message field', array($this, 'formMessageLabel'), 'contact-form-settings-page', 'contact_form_settings');
         register_setting('contactform-group','contact_form_message_field',array('santize_callback'=> 
@@ -165,6 +171,20 @@ class ContactFormPlugin {
         <input type="text" name="contact_form_name_label" value="<?php echo esc_attr(get_option('contact_form_name_label'));?>">
         
     <?php }
+
+    /**
+     *  Display the label for form subject field
+     */
+
+
+     function formSubjectLabel() { ?>
+
+            
+            
+        <input type="text" name="contact_form_subject_field" value="<?php echo esc_attr(get_option('contact_form_subject_field'));?>">
+        
+    <?php }
+
 
 
     /**
@@ -259,6 +279,11 @@ class ContactFormPlugin {
         $content .= '<input type="text" class="form-control" name="phone_number" id="phone_number" size="40" placeholder="111-222-3333" maxlength="20" /><br/>';
         $content .= '<span class="error" aria-live="polite"></span>';
         $content .= '<br /><br />';
+        // Subject
+        $content .= '<label for="your_subject">' . get_option('contact_form_subject_field') . '</label><br>';
+        $content .= '<input type="text" class="form-control" name="your_subject" id="your_subject" size="40" placeholder="Please type your subject" maxlength="20" /><br/>';
+        $content .= '<span class="error" aria-live="polite"></span>';
+        $content .= '<br /><br />';
         //Message
         $content .= '<label for="your_message">' . get_option('contact_form_message_field') . '</label><br>';
         $content .= '<textarea name="your_message" id="your_message" class="form-control" placeholder="Message" rows="4" cols="50" maxlength="50"></textarea><br/>';
@@ -301,12 +326,13 @@ class ContactFormPlugin {
 
             // the subject of the email
             $to = get_option('send_to_email');
-            $subject = "Maplesyrup Web Form Submission";
+            $subject = "Contact Form Submission";
             $body = '';
 
             $theName = sanitize_text_field($_POST['full_name']);
             $theEmail = sanitize_text_field($_POST['email_address']);
             $thePhone = sanitize_text_field($_POST['phone_number']);
+            $theSubject = sanitize_text_field($_POST['your_subject']);
             $theMessage = sanitize_textarea_field($_POST['your_message']);
             $headers = 'From: '.$theName.' <'.$theEmail.'>' . "\r\n" . 'Reply-To: ' . $theEmail;
             wp_mail($to, $subject, $theMessage, $headers);
@@ -321,6 +347,7 @@ class ContactFormPlugin {
                 $body .= 'Name: '.$theName.' <br /> ';
                 $body .= 'Email: '.$theEmail.' <br /> ';
                 $body .= 'Phone: '.$thePhone. ' <br /> ';
+                $body .= 'Subject: '.$theSubject. ' <br /> ';
                 $body .= 'Message: '.$theMessage.' <br /> ';
                 $theDateTime = current_time('mysql');
 
@@ -362,7 +389,7 @@ class ContactFormPlugin {
                 $stringDate = $thedatetime->format('Y-m-d H:i:s');
                 $tablename = $wpdb->prefix."contact_form_submissions";
                 // Use MySQL prepared statements
-                $sql = $wpdb->prepare("INSERT INTO $tablename (`theDateTime`, `theName`, `theEmail`, `thePhone`, `theMessage`) values (%s, %s, %s, %s,%s)", $stringDate, $theName, $theEmail, $thePhone, $theMessage); 
+                $sql = $wpdb->prepare("INSERT INTO $tablename (`theDateTime`, `theName`, `theEmail`, `thePhone`,`theSubject`, `theMessage`) values (%s, %s, %s, %s,%s)", $stringDate, $theName, $theEmail, $thePhone, $theSubject, $theMessage); 
                 $result = $wpdb->query($sql);
 
                 //Add sucess message below the form with div continaer
